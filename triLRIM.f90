@@ -2,8 +2,6 @@ program tri
   include 'triLRIM.comm.inc'
   
   character (len = 50) fname
-  
-
 
   real    (kind = 8) :: atan, la, lb, lc, alpha, qre, qrb, atmp, rnx, rny
   integer (kind = 4) :: i,j,k
