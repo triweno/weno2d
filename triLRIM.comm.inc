@@ -23,13 +23,13 @@
 
 
 
-  real (kind = 8), parameter :: epsilon = 1.d-5,             &
+  real (kind = 8), parameter :: epsilon = 1.d-5,                &
                                 tmax    = 2500.d-4,             &
-                                tau     = 1.d-5,            &
+                                tau     = 1.d-9,                &
                                 m_pi    = 3.14159265358979d0
   
   integer, parameter :: PRINT_STEP = 10,    &
-                        SAVE_STEP  = 500
+                        SAVE_STEP  = 100
  
 !   real (kind = 8),parameter  :: RO1_ = 12.09D0, U1_ = 0.D0, P1_ = 2.152D+5, V1_ = 97.76D0
 !   real (kind = 8),parameter  :: RO2_ = 6.037D0, U2_ = 0.d0, P2_ = 1.D+5,    V2_ = 0.d0

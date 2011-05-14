@@ -2,6 +2,8 @@ program tri
   include 'triLRIM.comm.inc'
   
   character (len = 50) fname
+  
+
 
   real    (kind = 8) :: atan, la, lb, lc, alpha, qre, qrb, atmp, rnx, rny
   integer (kind = 4) :: i,j,k
@@ -153,21 +155,47 @@ program tri
       is_bound = .false.
       do j =0, 2
         call ENO(i, j, rnx, rny, la)
-        call RIM(RI,EI,PI,UIn,VIn,WIn,CI)
-           
-        UI = rnx*UIn-rny*VIn
-        VI = rny*UIn+rnx*VIn
-        WI = WIn
-                
-        FR= UI*RI
-        FU= FR*UI + PI
-        FV= FR*VI
-        FE= FR*(EI+0.5d0*(UI**2+VI**2))+ PI*UI
+!         call RIM(RI,EI,PI,UIn,VIn,WIn,CI)
+!            
+!         UI = rnx*UIn-rny*VIn
+!         VI = rny*UIn+rnx*VIn
+!         WI = WIn
+!                 
+!         FR= UI*RI
+!         FU= FR*UI + PI
+!         FV= FR*VI
+!         FE= FR*(EI+0.5d0*(UI**2+VI**2))+ PI*UI
+!          
+!         GR= VI*RI
+!         GU= GR*UI
+!         GV= GR*VI + PI
+!         GE= GR*(EI+0.5d0*(UI**2+VI**2))+ PI*VI
+
+        alpha = max(abs(-rny*ub+rnx*vb) + dsqrt(GAM*pb/rb), & 
+                    abs(-rny*ue+rnx*ve) + dsqrt(GAM*pe/re), & 
+                    abs(rnx*ub+rny*vb)  + dsqrt(GAM*pb/rb), & 
+                    abs(rnx*ue+rny*ve)  + dsqrt(GAM*pe/re) )
+				EB = PB/(AGAM*RB)        
+				EE = PE/(AGAM*RE)        
+				        
+
+        FR= (UB*RB+UE*RE              -alpha*(RE-RB))*5.d-1
+        FU= (RB*UB*UB+PB+RE*UE*UE+PE  -alpha*(RE*UE-RB*UB))*5.d-1
+        FV= (RB*UB*VB+PB+RE*UE+VE+PE  -alpha*(RE*VE-RB*VB))*5.d-1
+        FE= (RE*UE*(EE+0.5d0*((UE)**2+(VE)**2))+ PE*UE + &
+             RB*UB*(EB+0.5d0*((UB)**2+(VB)**2))+ PB*UB - &
+             alpha*( &
+             RE*(EE+0.5d0*((UE)**2+(VE)**2)) -  &
+             RB*(EB+0.5d0*((UB)**2+(VB)**2))   )   )*5.d-1
          
-        GR= VI*RI
-        GU= GR*UI
-        GV= GR*VI + PI
-        GE= GR*(EI+0.5d0*(UI**2+VI**2))+ PI*VI
+        GR= (VB*RB+VE*RE             -alpha*(RE-RB))*5.d-1
+        GU= (RB*VB*UB+RE*VE*UE       -alpha*(RE*UE-RB*UB))*5.d-1
+        GV= (RB*VB*VB+PB+RE*VE*VE+PE -alpha*(RE*VE-RB*VB))*5.d-1
+        GE= (RE*VE*(EE+0.5d0*((UE)**2+(VE)**2))+ PE*VE + &
+             RB*VB*(EB+0.5d0*((UB)**2+(VB)**2))+ PB*VB - &
+             alpha*( &
+             RE*(EE+0.5d0*((UE)**2+(VE)**2)) -  &
+             RB*(EB+0.5d0*((UB)**2+(VB)**2))   )   )*5.d-1
         
         rtmp = rtmp + (FR*rnx + GR*rny)*la
         utmp = utmp + (FU*rnx + GU*rny)*la
@@ -232,21 +260,70 @@ program tri
       is_bound = .false.
       do j =0, 2
         call ENO(i, j, rnx, rny, la)
-        call RIM(RI,EI,PI,UIn,VIn,WIn,CI)
+!         call RIM(RI,EI,PI,UIn,VIn,WIn,CI)
+! 
+!       if ((RI.ne.RI).or.(PI.ne.PI).or.(UI.ne.UI).or.(VI.ne.VI)) then
+!         print *, 'E R R O R ! ! !    (step 2/2, RIM)'
+!         print *, 't = ', t
+!         print *, 'i = ', i
+!         print *, 'bnd = ', xbound(i)  
+!         print *, 'xci = ', centers(1,i)  
+!         print *, 'yci = ', centers(2,i)
+!         print *, 'ri = ', RI  
+!         print *, 'pi = ', pi  
+!         print *, 'ui = ', ui  
+!         print *, 'vi = ', vi  
+!         print *, 'ei = ', ei 
+!         print *, '---'
+!         print *, 'RB = ', RB
+!         print *, 'PB = ', PB
+!         print *, 'UB = ', UB
+!         print *, 'VB = ', VB
+!         print *, 'RE = ', RE
+!         print *, 'PE = ', PE
+!         print *, 'UE = ', UE
+!         print *, 'VE = ', VE
+!         stop
+!       endif
+!         UI = rnx*UIn-rny*VIn
+!         VI = rny*UIn+rnx*VIn
+!         WI = WIn
+!                 
+!         FR= UI*RI
+!         FU= FR*UI + PI
+!         FV= FR*VI
+!         FE= FR*(EI+0.5d0*(UI**2+VI**2))+ PI*UI
+!          
+!         GR= VI*RI
+!         GU= GR*UI
+!         GV= GR*VI + PI
+!         GE= GR*(EI+0.5d0*(UI**2+VI**2))+ PI*VI
 
-        UI = rnx*UIn-rny*VIn
-        VI = rny*UIn+rnx*VIn
-        WI = WIn
-                
-        FR= UI*RI
-        FU= FR*UI + PI
-        FV= FR*VI
-        FE= FR*(EI+0.5d0*(UI**2+VI**2))+ PI*UI
+        alpha = max(abs(-rny*ub+rnx*vb) + dsqrt(GAM*pb/rb), & 
+                    abs(-rny*ue+rnx*ve) + dsqrt(GAM*pe/re), & 
+                    abs(rnx*ub+rny*vb)  + dsqrt(GAM*pb/rb), & 
+                    abs(rnx*ue+rny*ve)  + dsqrt(GAM*pe/re) )
+				EB = PB/(AGAM*RB)        
+				EE = PE/(AGAM*RE)        
+				        
+
+        FR= (UB*RB+UE*RE              -alpha*(RE-RB))*5.d-1
+        FU= (RB*UB*UB+PB+RE*UE*UE+PE  -alpha*(RE*UE-RB*UB))*5.d-1
+        FV= (RB*UB*VB+PB+RE*UE+VE+PE  -alpha*(RE*VE-RB*VB))*5.d-1
+        FE= (RE*UE*(EE+0.5d0*((UE)**2+(VE)**2))+ PE*UE + &
+             RB*UB*(EB+0.5d0*((UB)**2+(VB)**2))+ PB*UB - &
+             alpha*( &
+             RE*(EE+0.5d0*((UE)**2+(VE)**2)) -  &
+             RB*(EB+0.5d0*((UB)**2+(VB)**2))   )   )*5.d-1
          
-        GR= VI*RI
-        GU= GR*UI
-        GV= GR*VI + PI
-        GE= GR*(EI+0.5d0*(UI**2+VI**2))+ PI*VI
+        GR= (VB*RB+VE*RE             -alpha*(RE-RB))*5.d-1
+        GU= (RB*VB*UB+RE*VE*UE       -alpha*(RE*UE-RB*UB))*5.d-1
+        GV= (RB*VB*VB+PB+RE*VE*VE+PE -alpha*(RE*VE-RB*VB))*5.d-1
+        GE= (RE*VE*(EE+0.5d0*((UE)**2+(VE)**2))+ PE*VE + &
+             RB*VB*(EB+0.5d0*((UB)**2+(VB)**2))+ PB*VB - &
+             alpha*( &
+             RE*(EE+0.5d0*((UE)**2+(VE)**2)) -  &
+             RB*(EB+0.5d0*((UB)**2+(VB)**2))   )   )*5.d-1
         
         rtmp = rtmp + (FR*rnx + GR*rny)*la
         utmp = utmp + (FU*rnx + GU*rny)*la
@@ -267,7 +344,7 @@ program tri
       p(i)= AGAM*e(i)*ro_1(i)
 
 !-------------------------------------------------------------
-      if ((r(i) <= 0.d0).or.(p(i) <= 0.d0)) then
+      if ((r(i).ne.r(i)).or.(p(i).ne.p(i)).or.(u(i).ne.u(i)).or.(v(i).ne.v(i))) then
         print *, 'E R R O R ! ! !    (step 2/2)'
         print *, 't = ', t
         print *, 'i = ', i
@@ -372,14 +449,16 @@ subroutine ENO(i, j, rnx, rny, la)
 
   real    (kind = 8) :: rnx, rny, la, sina, cosa, lc
 	integer (kind = 4) :: i, j, k
+	real    (kind = 8) :: RBx,RBy,PBx,PBy,UBx,UBy,VBx,VBy, &
+	                      REx,REy,PEx,PEy,UEx,UEy,VEx,VEy
 
         k = tri_neigh(mod(j+2,3)+1, i)
         xa = x(1, tri_v(mod(j,3)+1, i))
         ya = x(2, tri_v(mod(j,3)+1, i))
         xb = x(1, tri_v(mod(j+1,3)+1, i))
         yb = x(2, tri_v(mod(j+1,3)+1, i))
-        xc = (xa+xb)/2
-        yc = (ya+yb)/2
+        xc = (xa+xb)/2.d0
+        yc = (ya+yb)/2.d0
         if (k < 0) then
           if (dabs(ya-yb)<=epsilon)  then
             xk=centers(1,i)
@@ -457,11 +536,39 @@ subroutine ENO(i, j, rnx, rny, la)
         vtmp = -sina*UE+cosa*VE
         UE = utmp
         VE = vtmp
+        
+        if (RB .NE. RB) goto 333
+        if (PB .NE. PB) goto 333
+        if (UB .NE. UB) goto 333
+        if (VB .NE. VB) goto 333
+        if (RE .NE. RE) goto 333
+        if (PE .NE. PE) goto 333
+        if (UE .NE. UE) goto 333
+        if (VE .NE. VE) goto 333
+        
+        
+        return
+        
+ 333    print *, '===== ENO ====='
+        print *, 'RB = ', RB
+        print *, 'PB = ', PB
+        print *, 'UB = ', UB
+        print *, 'VB = ', VB
+        print *, 'RE = ', RE
+        print *, 'PE = ', PE
+        print *, 'UE = ', UE
+        print *, 'VE = ', VE
+        print *
+				stop        
 end subroutine ENO
 
 subroutine interpolation(Rx,Ry,Px,Py,Ux,Uy,Vx,Vy,ind)
-	real (kind = 8) :: RBx,RBy,PBx,PBy,UBx,UBy,VBx,VBy
-	real (kind = 8), dimension(0:2) :: xk,yk,rk,pk,uk,vk 
+  include 'triLRIM.comm.inc'
+	real (kind = 8) :: Rx,Ry,Px,Py,Ux,Uy,Vx,Vy
+	real (kind = 8) :: Rx1,Ry1,Px1,Py1,Ux1,Uy1,Vx1,Vy1
+	real (kind = 8) :: maxu,maxr,maxp,maxv,cosu,cosv,cosp,cosr,det
+	real (kind = 8), dimension(0:2) :: xk1,yk1,rk1,pk1,uk1,vk1
+  integer (kind = 4) :: i,j,k,k1,k2,ind 
 
 	do j = 0, 2
 	 	k = tri_neigh(mod(j+2,3)+1, ind)
@@ -472,46 +579,93 @@ subroutine interpolation(Rx,Ry,Px,Py,Ux,Uy,Vx,Vy,ind)
 	 	yb = x(2, tri_v(mod(j+1,3)+1, ind))
 		if (k < 0) then
 			if (dabs(ya-yb)<=epsilon)  then
-			  xk(j)=cm(1,ind)
-			  yk(j)=2*ya-cm(2,ind)
+			  xk1(j) = cm(1,ind)
+			  yk1(j) = 2*ya-cm(2,ind)
 			  if (dabs(ya-ymin)<=epsilon) then
-			    rk(j) = RO1_
-			    pk(j) = P1_
-			    uk(j) = U1_
-			    vk(j) = V1_
+			    rk1(j) = RO1_
+			    pk1(j) = P1_
+			    uk1(j) = U1_
+			    vk1(j) = V1_
 			  else
-			    rk(j)=  RB 
-			    uk(j)=  UB
-			    vk(j)= -VB
-			    pk(j)=  PB
+			    rk1(j)=  r(ind) 
+			    uk1(j)=  u(ind)
+			    vk1(j)= -v(ind)
+			    pk1(j)=  p(ind)
 			  endif
 			else
-			  xk(j)=2.d0*xb-cm(1,ind)
-			  yk(j)=cm(2,ind)
-				rk(j)=  RB
-			  uk(j)= -UB
-			  vk(j)=  VB
-			  pk(j)=  PB
+			  xk1(j) = 2.d0*xa-cm(1,ind)
+			  yk1(j) = cm(2,ind)
+				rk1(j)=  r(ind)
+			  uk1(j)= -u(ind)
+			  vk1(j)=  v(ind)
+			  pk1(j)=  p(ind)
 			endif
 	  else
-		  xk(j)=cm(1,k)
-		  yk(j)=cm(2,k)
-		  rk(j)=r(k)
-		  uk(j)=u(k)
-		  vk(j)=v(k)
-		  pk(j)=p(k)
+		  xk1(j)=cm(1,k)
+		  yk1(j)=cm(2,k)
+		  rk1(j)=r(k)
+		  uk1(j)=u(k)
+		  vk1(j)=v(k)
+		  pk1(j)=p(k)
 	 	endif
 	enddo
- 
+  maxr = 0.d0
+  maxp = 0.d0
+  maxu = 0.d0
+  maxv = 0.d0  
+  
 	do j = 0, 2
  		k1 = mod(j,3)
  		k2 = mod(j+1,3)
  		!U
- 		det = ((xk(k1)-cm(1,ind))*(yk(k2)-cm(2,ind))-(yk(k1)-cm(2,ind))*(xk(k2)-cm(1,ind)))
- 		Ux = ((uk(k1)-u(ind))*(yk(k2)-cm(2,ind))-(yk(k1)-cm(2,ind))*(uk(k2)-u(ind)))/det
-		Uy = ((xk(k1)-cm(1,ind))*(yk(k2)-cm(2,ind))-(yk(k1)-cm(2,ind))*(xk(k2)-cm(1,ind)))
- 		
+ 		det = ((xk1(k1)-cm(1,ind))*(yk1(k2)-cm(2,ind))-(yk1(k1)-cm(2,ind))*(xk1(k2)-cm(1,ind)))
+ 		Ux1 = ((uk1(k1)-u(ind))*(yk1(k2)-cm(2,ind))-(yk1(k1)-cm(2,ind))*(uk1(k2)-u(ind)))/det
+		Uy1 = ((xk1(k1)-cm(1,ind))*(uk1(k2)-u(ind))-(uk1(k1)-u(ind))*(xk1(k2)-cm(1,ind)))/det
+		cosu = 1/dsqrt(1+Ux1*Ux1+Uy1*Uy1)
+		!R
+ 		Rx1 = ((rk1(k1)-r(ind))*(yk1(k2)-cm(2,ind))-(yk1(k1)-cm(2,ind))*(rk1(k2)-r(ind)))/det
+		Ry1 = ((xk1(k1)-cm(1,ind))*(rk1(k2)-r(ind))-(rk1(k1)-r(ind))*(xk1(k2)-cm(1,ind)))/det
+		cosr = 1/dsqrt(1+Rx1*Rx1+Ry1*Ry1)
+		!P
+		Px1 = ((pk1(k1)-p(ind))*(yk1(k2)-cm(2,ind))-(yk1(k1)-cm(2,ind))*(pk1(k2)-p(ind)))/det
+		Py1 = ((xk1(k1)-cm(1,ind))*(pk1(k2)-p(ind))-(pk1(k1)-p(ind))*(xk1(k2)-cm(1,ind)))/det
+		cosp = 1/dsqrt(1+Px1*Px1+Py1*Py1)
+		!V
+		Vx1 = ((vk1(k1)-v(ind))*(yk1(k2)-cm(2,ind))-(yk1(k1)-cm(2,ind))*(vk1(k2)-v(ind)))/det
+		Vy1 = ((xk1(k1)-cm(1,ind))*(vk1(k2)-v(ind))-(vk1(k1)-v(ind))*(xk1(k2)-cm(1,ind)))/det
+		cosr = 1/dsqrt(1+Vx1*Vx1+Vy1*Vy1)
+		
+		if (cosu>=maxu) then
+		  maxu = cosu
+		  Ux = Ux1
+		  Uy = Uy1
+ 		endif
+ 		if (cosr>=maxr) then
+		  maxr = cosr
+		  Rx = Rx1
+		  Ry = Ry1
+ 		endif
+ 		if (cosp>=maxp) then
+		  maxp = cosp
+		  Px = Px1
+		  Py = Py1
+ 		endif
+ 		if (cosv>=maxv) then
+		  maxv = cosv
+		  Vx = Vx1
+		  Vy = Vy1
+ 		endif
  	enddo
+!  	
+!  	Rx = 0.d0
+!  	Ry = 0.d0
+!  	px = 0.d0
+!  	py = 0.d0
+!  	ux = 0.d0
+!  	uy = 0.d0
+!  	vx = 0.d0
+!  	vy = 0.d0
+ 	
 end subroutine
 
      
